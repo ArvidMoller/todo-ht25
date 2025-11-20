@@ -1,1 +1,29 @@
+h2 Ny ToDo
+form action="/add" method="post"
+    input type="text" name="name" placeholder="Title"
+    input type="text" name="description" placeholder="Description"
+    input type="submit" value="Add"
 
+- @todos.each do |todo|
+    hr
+    h3 #{todo["name"]}
+    p #{todo["description"]}
+
+    form action="/#{todo["id"]}/edit" method="get" 
+        input type="submit" value="Edit"
+
+    form action="/#{todo["id"]}/finished" method="post" 
+        input type="submit" value="Finished"
+
+    form action="/todos/#{todo["id"]}/delete" method="post"
+        input type="submit" value="Delete"
+
+    br
+
+hr
+br
+h2 Finished ToDos
+- @finished_todos.each do |todo|
+    hr
+    h3 #{todo["name"]}
+    p #{todo["description"]}
