@@ -1,13 +1,32 @@
 h2 Ny ToDo
-form action="/add" method="post"
+form action="/todos/add" method="post"
     input type="text" name="name" placeholder="Title"
     input type="text" name="description" placeholder="Description"
+    br
+    label for="category" Category:
+    select name="category" id="category"
+        - @categories.each do |category|
+            option value="#{category["category"]}" #{category["category"]}   
     input type="submit" value="Add"
+
+hr
+
+h3 Edit categories
+form action="/categories/add" method="post"
+    input type="text" name="category" placeholder="Category Name"
+    input type="submit" value="Add category"
+
+form action="/categories/delete" method="post"
+    select name="category" id="category"
+        - @categories.each do |category|
+            option value="#{category["category"]}" #{category["category"]}
+    input type="submit" value="Delete category"
 
 - @todos.each do |todo|
     hr
     h3 #{todo["name"]}
     p #{todo["description"]}
+    i #{todo["category"]}  
 
     form action="/#{todo["id"]}/edit" method="get" 
         input type="submit" value="Edit"
@@ -22,8 +41,10 @@ form action="/add" method="post"
 
 hr
 br
+
 h2 Finished ToDos
 - @finished_todos.each do |todo|
     hr
     h3 #{todo["name"]}
     p #{todo["description"]}
+    i #{todo["category"]}

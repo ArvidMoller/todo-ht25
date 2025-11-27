@@ -3,4 +3,9 @@ h2 Edit
 form action="/todos/#{@todos["id"]}/updates" method="post"
     input type="text" name="name" value="#{@todos["name"]}"
     input type="text" name="description" value="#{@todos["description"]}"
+    br
+    label for="category" Category:
+    select name="category" id="category"
+        - @categories.each do |category|
+            option value="#{category["category"]}" #{category["category"]}  
     input type="submit" value="Edit"
