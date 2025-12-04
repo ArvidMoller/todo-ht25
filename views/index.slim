@@ -5,8 +5,9 @@ form action="/todos/add" method="post"
     br
     label for="category" Category:
     select name="category" id="category"
+        option value="" selected="selected" disabled="selected" Select category
         - @categories.each do |category|
-            option value="#{category["category"]}" #{category["category"]}   
+            option value="#{category["id"]}" #{category["category"]}   
     input type="submit" value="Add"
 
 hr
@@ -18,9 +19,11 @@ form action="/categories/add" method="post"
 
 form action="/categories/delete" method="post"
     select name="category" id="category"
+        option value="" selected="selected" disabled="selected" Select category
         - @categories.each do |category|
-            option value="#{category["category"]}" #{category["category"]}
+            option value="#{category["id"]}" #{category["category"]}
     input type="submit" value="Delete category"
+
 
 - @todos.each do |todo|
     hr
@@ -48,3 +51,6 @@ h2 Finished ToDos
     h3 #{todo["name"]}
     p #{todo["description"]}
     i #{todo["category"]}
+
+    form action="/#{todo["id"]}/unfinished" method="post" 
+        input type="submit" value="Unfinished"

@@ -1,11 +1,14 @@
 h2 Edit
 
-form action="/todos/#{@todos["id"]}/updates" method="post"
-    input type="text" name="name" value="#{@todos["name"]}"
-    input type="text" name="description" value="#{@todos["description"]}"
+form action="/todos/#{@todo["id"]}/updates" method="post"
+    input type="text" name="name" value="#{@todo["name"]}"
+    input type="text" name="description" value="#{@todo["description"]}"
     br
     label for="category" Category:
     select name="category" id="category"
         - @categories.each do |category|
-            option value="#{category["category"]}" #{category["category"]}  
+            - if category["category"] == @todo["category"]
+                option value="#{category["category"]}" selected="selected" #{category["category"]}
+            - else
+                option value="#{category["category"]}" #{category["category"]}
     input type="submit" value="Edit"

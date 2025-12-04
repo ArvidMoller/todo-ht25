@@ -19,11 +19,14 @@ end
 post("/todos/add") do
     name = params[:name]
     description = params[:description]
-    category = params[:category]
+    category_id = params[:category]
 
-    db = SQLite3::Database.new("db/todos.db")
-    category_id = db.execute("SELECT id FROM categories WHERE category = ?", category)
-    db.execute("INSERT INTO todos (name, description, finished, category) VALUES (?, ?, ?, ?)", [name, description, "0", category_id])
+    p category_id
+
+    if category_id != nil
+        db = SQLite3::Database.new("db/todos.db")
+        db.execute("INSERT INTO todos (name, description, finished, category) VALUES (?, ?, ?, ?)", [name, description, "0", category_id])
+    end
 
     redirect("/")
 end
@@ -32,32 +35,39 @@ end
 post("/categories/add") do
     category = params[:category]
 
-    db = SQLite3::Database.new("db/todos.db")
-    db.execute("INSERT INTO categories (category) VALUES (?)", category)
+    if category != nil
+        db = SQLite3::Database.new("db/todos.db")
+        db.execute("INSERT INTO categories (category) VALUES (?)", category)
+    end
 
     redirect("/")
 end
 
 
 post("/categories/delete") do
-    category = params[:category]
+    category_id = params[:category]
 
-    db = SQLite3::Database.new("db/todos.db")
-    db.results_as_hash = true
+    if category_id != nil
 
-    todos = db.execute("SELECT todos.*, categories.category FROM todos INNER JOIN categories ON todos.category = categories.id")
-    in_use = false
-    todos.each do |todo|
-        if todo["category"] == category
-            in_use = true
-            break
+        db = SQLite3::Database.new("db/todos.db")
+        db.results_as_hash = true
+
+        todos = db.execute("SELECT * FROM todos")
+        in_use = false
+        todos.each do |todo|
+            if todo["category"] == category_id
+                in_use = true
+                break
+            end
         end
-    end
 
-    if in_use == false
-        db.execute("DELETE FROM categories WHERE category = ?", category)
+        if in_use == false
+            db.execute("DELETE FROM categories WHERE id = ?", category_id)
+        else
+            p "Unable to delete category category since it is currently in use."
+        end
     else
-        p "Unable to delete category #{category} since it is currently in use."
+        p "Unable to remove nil category"
     end
 
     redirect("/")
@@ -79,7 +89,7 @@ get("/:id/edit") do
 
     db = SQLite3::Database.new("db/todos.db")
     db.results_as_hash = true
-    @todos = db.execute("SELECT * FROM todos WHERE id = ?", id).first
+    @todo = db.execute("SELECT todos.*, categories.category FROM todos INNER JOIN categories ON todos.category = categories.id WHERE todos.id = ?", id).first
     @categories = db.execute("SELECT * FROM categories")    
 
     slim(:edit)
@@ -103,6 +113,16 @@ end
 post("/:id/finished") do
     id = params[:id]
     finished = "1"
+
+    db = SQLite3::Database.new("db/todos.db")
+    db.execute("UPDATE todos SET finished = ? WHERE id = ?", [finished, id])
+
+    redirect("/")
+end
+
+post("/:id/unfinished") do
+    id = params[:id]
+    finished = "0"
 
     db = SQLite3::Database.new("db/todos.db")
     db.execute("UPDATE todos SET finished = ? WHERE id = ?", [finished, id])
