@@ -17,6 +17,7 @@ end
 def drop_tables(db)
   db.execute('DROP TABLE IF EXISTS todos')
   db.execute('DROP TABLE IF EXISTS categories')
+  db.execute('DROP TABLE IF EXISTS users')
 end
 
 def create_tables(db)
@@ -25,21 +26,30 @@ def create_tables(db)
               name TEXT NOT NULL, 
               description TEXT,
               finished boolean, 
-              category INTEGER)')
+              category INTEGER, 
+              user INTEGER)')
 
   db.execute('CREATE TABLE categories (
               id INTEGER PRIMARY KEY AUTOINCREMENT,
               category TEXT)')
+
+  db.execute('CREATE TABLE users (
+              id INTEGER PRIMARY KEY AUTOINCREMENT, 
+              username TEXT, 
+              password TEXT)')
 end
 
 def populate_tables(db)
-  db.execute('INSERT INTO todos (name, description, finished, category) VALUES ("Köp mjölk", "3 liter mellanmjölk, eko", false, 1)')
-  db.execute('INSERT INTO todos (name, description, finished, category) VALUES ("Möte", "Möte med chefen kl. 12", false, 2)')
-  db.execute('INSERT INTO todos (name, description, finished, category) VALUES ("Göra läxor", "Göra engelska läxor", false, 3)')
+  db.execute('INSERT INTO todos (name, description, finished, category, user) VALUES ("Köp mjölk", "3 liter mellanmjölk, eko", false, 1, 1)')
+  db.execute('INSERT INTO todos (name, description, finished, category, user) VALUES ("Möte", "Möte med chefen kl. 12", false, 2, 2)')
+  db.execute('INSERT INTO todos (name, description, finished, category, user) VALUES ("Göra läxor", "Göra engelska läxor", false, 3, 1)')
 
   db.execute('INSERT INTO categories (category) VALUES ("Private")')
   db.execute('INSERT INTO categories (category) VALUES ("Work")')
   db.execute('INSERT INTO categories (category) VALUES ("School")')
+
+  db.execute('INSERT INTO users (username, password) VALUES ("arvid", "arvid")')
+  db.execute('INSERT INTO users (username, password) VALUES ("olof", "olof")')
 end
 
 seed!(db)

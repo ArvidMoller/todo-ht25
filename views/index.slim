@@ -1,4 +1,10 @@
+form action="/logout" method="post"
+    input type="submit" value="Logout"
+
+hr
+
 h2 Ny ToDo
+
 form action="/todos/add" method="post"
     input type="text" name="name" placeholder="Title"
     input type="text" name="description" placeholder="Description"
@@ -54,3 +60,8 @@ h2 Finished ToDos
 
     form action="/#{todo["id"]}/unfinished" method="post" 
         input type="submit" value="Unfinished"
+
+hr
+h3 Delete account
+form action="/user/#{session[:user]["id"]}/delete" method="post"
+    input type="submit" value="Delete account"
