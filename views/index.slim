@@ -8,8 +8,6 @@ h2 Ny ToDo
 form action="/todos/add" method="post"
     input type="text" name="name" placeholder="Title"
     input type="text" name="description" placeholder="Description"
-    br
-    label for="category" Category:
     select name="category" id="category"
         option value="" selected="selected" disabled="selected" Select category
         - @categories.each do |category|

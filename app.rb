@@ -2,13 +2,14 @@ require 'sinatra'
 require 'sqlite3'
 require 'slim'
 require 'sinatra/reloader'
+require 'bcrypt'
 enable :sessions
 
 
 get('/') do
     slim(:login)
 end
-
+ 
 
 get('/todos') do
     db = SQLite3::Database.new("db/todos.db")
@@ -18,7 +19,7 @@ get('/todos') do
 
     @todos = db.execute("SELECT todos.*, categories.category FROM todos INNER JOIN categories ON todos.category = categories.id WHERE finished = 0 AND user = ?", user["id"])
     @finished_todos = db.execute("SELECT todos.*, categories.category FROM todos INNER JOIN categories ON todos.category = categories.id WHERE finished = 1 AND user = ?", user["id"])
-    @categories = db.execute("SELECT * FROM categories")
+    @categories = db.execute("SELECT categories.id, categories.category FROM categories_relative INNER JOIN categories ON categories_relative.category_id = categories.id WHERE user_id = ?", user["id"])
 
     slim(:index)
 end
@@ -35,8 +36,8 @@ post("/login") do
     password = params[:password]
 
     if username != "" && password != ""
-        user = db.execute("SELECT * FROM users WHERE username = ? AND password = ?", [username, password]).first
-        if user != nil
+        user = db.execute("SELECT * FROM users WHERE username = ?", [username]).first
+        if user != nil && BCrypt::Password.new(user["password"]) == password
             session[:user] = user
             redirect("/todos")
         else
@@ -50,7 +51,7 @@ end
 
 
 post("/logout") do 
-    session.delete(:user)
+    session.clear
 
     redirect("/")
 end
@@ -74,8 +75,9 @@ post("/user/add") do
     end
 
     if password == password_confirm && username != "" && password != "" && password_confirm != "" && !username_list.include?(username)
+        password_digest = BCrypt::Password.create(password)
         db = SQLite3::Database.new("db/todos.db")
-        db.execute("INSERT INTO users (username, password) VALUES (?, ?)", [username, password])
+        db.execute("INSERT INTO users (username, password) VALUES (?, ?)", [username, password_digest])
         session[:user_message] = "User created!"
     else
         session[:user_message] = "Incorrect password or username already exists"
@@ -112,10 +114,14 @@ end
 
 post("/categories/add") do
     category = params[:category]
+    user = session[:user]
 
     if category != nil
         db = SQLite3::Database.new("db/todos.db")
-        db.execute("INSERT INTO categories category VALUES ?", category)
+        db.execute("INSERT INTO categories (category) VALUES (?)", category)
+
+        new_category_id = db.execute("SELECT id FROM categories").last
+        db.execute("INSERT INTO categories_relative (user_id, category_id) VALUES (?, ?)", [user["id"], new_category_id])
     end
 
     redirect("/todos")
@@ -141,6 +147,7 @@ post("/categories/delete") do
 
         if in_use == false
             db.execute("DELETE FROM categories WHERE id = ?", category_id)
+            db.execute("DELETE FROM categories_relative WHERE category_id = ?", category_id)
         else
             p "Unable to delete category category since it is currently in use."
         end
