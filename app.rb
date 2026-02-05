@@ -45,6 +45,7 @@ post("/login") do
             redirect("/")
         end
     else
+        session[:login_message] = "Incorrect username or password"
         redirect("/")
     end
 end
@@ -74,7 +75,7 @@ post("/user/add") do
         username_list << name["username"]
     end
 
-    if password == password_confirm && username != "" && password != "" && password_confirm != "" && !username_list.include?(username)
+    if password == password_confirm && username != "" && password != "" && !username_list.include?(username)
         password_digest = BCrypt::Password.create(password)
         db = SQLite3::Database.new("db/todos.db")
         db.execute("INSERT INTO users (username, password) VALUES (?, ?)", [username, password_digest])
@@ -82,6 +83,8 @@ post("/user/add") do
     else
         session[:user_message] = "Incorrect password or username already exists"
     end
+
+    session.delete(:login_message)
 
     redirect("/")
 end
